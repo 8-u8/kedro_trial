@@ -6,6 +6,11 @@ usedata:
   type: CSVLocalDataSet
   filepath: data/01_raw/UseData.csv
 
-preproccessed_Data:
+preprocessed_Data:
   type: CSVLocalDataSet
   filepath: data/02_intermediate/preprocessed_Data.csv
+
+regressor:
+  type: PickleLocalDataSet
+  filepath: data/06_models/LightGBMregressor.pkl
+  versioned: true

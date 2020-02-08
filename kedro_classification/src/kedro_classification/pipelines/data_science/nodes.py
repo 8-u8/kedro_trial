@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 import pandas as pd
 import numpy as np
 from typing import Any, Dict, List
@@ -10,7 +11,7 @@ from sklearn.model_selection import KFold, train_test_split
 import lightgbm as lgb
 
 
-def split_data(data: pd.DataFrame, parameters:Dict) -> List:
+def split_data(data: pd.DataFrame, parameters: Dict) -> List:
     y = data['y'].values
     X = data.drop(['ID','y'], axis=1)
     X = X.values
@@ -31,14 +32,15 @@ def Linear_Regression_model(
     return regressor
 
 def LightGBM_model(
-    X: pd.DataFrame,
-    y: np.ndarray,
+    data: pd.DataFrame,
+    #y: np.ndarray,
     parameters: Dict
     ) -> lgb.LGBMRegressor:
     
     ### define classes
     regressor = lgb.LGBMRegressor()
-
+    y = data['y']
+    X = data.drop(['y', 'ID'], axis=1)
     ### hyperparameters from parameters.yml
     lgb_params = {
             'n_estimators'         : parameters['n_estimators'],
@@ -62,17 +64,22 @@ def LightGBM_model(
     ### fold?
     ### I want to define this function out of LightGBM_model.
     ### Keep thinking...
-    fold = KFold(n_folds=parameters['folds'], random_state=parameters['random_state'])
+    fold = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
 
     oof_pred = np.zeros(len(X))
     ### run model with kfold
-    for train_index, valid_index in enumerate(fold.split(X, y)):
+    for k,   (train_index, valid_index) in enumerate(fold.split(X, y)):
+        print(train_index)
+
         X_train, X_valid = X.iloc[train_index], X.iloc[valid_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[valid_index]
     
-        regressor.fit(X_train, y_train, params = lgb_params)
+        lgb_train = lgb.Dataset(X_train, y_train)
+        lgb_valid = lgb.Dataset(X_valid, y_valid)
+
+        result = lgb.train(lgb_params, lgb_train, valid_sets=lgb_valid)
 
     
     ### todo: evaluation, predict oof...
     
-    return regressor
+    return result

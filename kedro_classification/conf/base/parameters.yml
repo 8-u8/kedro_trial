@@ -1,21 +1,23 @@
 
+##### Do not write any parameters which not use #####
+# split_data
 test_size: 0.2
 random_state: 1111
-folds: 5
 
-# lightgbm_parameters
-n_estimators: 8000,
-boosting_type: 'gbdt',
-objective: 'tweedie',
-metric: 'rmse',
-subsample: 0.85,
-subsample_freq: 1,
-learning_rate: 0.001,
-feature_fraction: 0.9,
-max_depth: 15,
-lambda_l1: 1.25,  
-lambda_l2: 1,
-verbose: 1000,
-early_stopping_rounds: 100,
-eval_metric: 'tweedie',
-seed': 114514
+# LightGBM_model
+folds: 5
+n_estimators: 8000
+boosting_type: 'gbdt'
+objective: 'regression'
+metric: 'rmse'
+subsample: 0.85
+subsample_freq: 1
+learning_rate: 0.001
+feature_fraction: 0.9
+max_depth: 15
+lambda_l1: 1.25
+lambda_l2: 1
+verbose: 1000
+early_stopping_rounds: 100
+eval_metric: 'tweedie'
+seed: 114514
