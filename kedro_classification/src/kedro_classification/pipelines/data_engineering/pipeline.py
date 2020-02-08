@@ -10,7 +10,7 @@ def create_pipeline(**kwargs):
             node(
                 func=preprocessing,
                 inputs='usedata',
-                outputs='preproccessed_Data',
+                outputs='preprocessed_Data',
                 name='preprocessed_Data',
             ),
         ]
