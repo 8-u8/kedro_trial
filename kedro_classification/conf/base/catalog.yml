@@ -1,0 +1,11 @@
+# Here you can define all your data sets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in the kedro docs under `Accessing data`
+# You can access the kedro docs by running `kedro docs`
+usedata:
+  type: CSVLocalDataSet
+  filepath: data/01_raw/UseData.csv
+
+preproccessed_Data:
+  type: CSVLocalDataSet
+  filepath: data/02_intermediate/preprocessed_Data.csv
