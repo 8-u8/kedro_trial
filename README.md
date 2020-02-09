@@ -1,5 +1,8 @@
 # README
-This is a kedro usage report in [Japanese Blog](http://socinuit.hatenablog.com/entry/2020/02/08/210423).
+## What is this?
+This is a kedro usage report in [my blog](http://socinuit.hatenablog.com/entry/2020/02/08/210423).
+
+個人ブログから転載し、一部をgithubでのmd記法に書き換えたものです。
 
 # 個人的背景
 
@@ -10,7 +13,7 @@ pipelineを作ろうと言うことになりました。
 ただ、私はエンジニアリング畑ではないので、ゼロから作れる自信がありません。  
 困ったなー困ったなーと思っていたところに、こんなQiitaを見かけました。
 
-[https://qiita.com/Minyus86/items/70622a1502b92ac6b29c:embed:cite]
+[PythonのPipelineパッケージ比較：Airflow, Luigi, Gokart, Metaflow, Kedro, PipelineX](https://qiita.com/Minyus86/items/70622a1502b92ac6b29c)
 
 なるほど、いろいろあるんだな、となりました。  
 この中から今回はKedroを導入しとりあえず触ってみたのでレポします。
@@ -26,7 +29,7 @@ pipelineを作ろうと言うことになりました。
 ## Kedroとは
 
 もうgithubに飛んだほうが早い
-[https://github.com/quantumblacklabs/kedro:embed:cite]
+[https://github.com/quantumblacklabs/kedro]
 
 Quantumblack社が手がけるオープンソースのpipelineライブラリです。  
 
@@ -55,19 +58,15 @@ Twitterで「このやり方あとで調べよう」つったら
 こうしていろいろ教えてくれるんだと思うだけで結構心強かったりします。
 
 ### ロゴ・バナーがかっこいい
-このツイートが全てです((このあと「でもさっきバナー変えようってPR送っちゃった」って開発主担当の人が言ってくれたんだけどどのみちかっこいいからいい))。  
+このツイートが全てです。  
 
-[https://twitter.com/0_u0/status/1224950323757740032:embed:cite]
-
-バナーみたとき「あ、かっこいいし使おう」ってなっちゃいました。中二病なので。†でHN囲むタイプの。†きぬいと†。  
-つらくなってきた。
+https://twitter.com/0_u0/status/1224950323757740032
 
 
 ## 使ってみた
 
 ドキュメントがあるのでぶっちゃけここから先は蛇足でしかないんですが、使ってみたレポートです。  
-実装githubは以下。  
-[https://github.com/8-u8/kedro_trial/tree/master/kedro_classification:embed:cite]
+実装githubはここです。
 
 Kedroは`pip`でインストールできます。
 
@@ -80,7 +79,7 @@ pip install kedro
 乱数で作ってるので、学習済みモデルも公開して問題ないっちゃ問題ない。何にも使えないので。  
 
 ### プロジェクト立ち上げは`kedro new`
-Rを使っていれば割と自然なプロジェクトという概念、Kedroにもあります((多分大体のライブラリにある))。  
+Rを使っていれば割と自然なプロジェクトという概念、Kedroにもあります。  
 コマンドラインに`kedro new`と入力すると対話的に「プロジェクト名」などを入力できます。  
 これが済むと、作業ディレクトリ上にkedroのプロジェクトフォルダができます。しゅごい。
 
@@ -90,7 +89,7 @@ Rを使っていれば割と自然なプロジェクトという概念、Kedro�
 大体作られます。すごい。
 
 ### フォルダ構成
-きぬいとのgitではこんな感じになっています。  
+このgitではこんな感じになっています。  
 `__init__`とか`__pycache__`とかもありますが省略しています。  
 フォルダ構成の時点できれいなのも好きです。  
 ただ、フォルダ量は膨大なので、各々の説明は公式ドキュメント等を参考にしてください。
@@ -203,7 +202,8 @@ def create_pipeline(**kwargs):
 ```
 
 実装も`nodes.py`の関数を持ってきて、  
-出力は`preprocessed_Data`として出す、というシンプルなものです((中間テーブルは`catalog.yml`で管理されます))。  
+出力は`preprocessed_Data`として出す、というシンプルなものです。  
+元テーブル含め、使う中間テーブルは`catalog.yml`で管理されます。  
 `pipeline.py`は`data_science`でも同様の記法で書きます。なので省略です。
 
 ### data_science
