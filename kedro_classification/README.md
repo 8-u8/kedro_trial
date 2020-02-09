@@ -2,6 +2,8 @@
 This is a kedro trial project and  usage report in Japanese
 It copied by [My blog](http://socinuit.hatenablog.com/entry/2020/02/08/210423).
 
+日本語で書いたブログをほぼそのまま移しています。
+
 # 個人的背景
 
 仕事でも機械学習の案件がちょっと増えてきたというのと、  
