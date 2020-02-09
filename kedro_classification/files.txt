@@ -1,0 +1,79 @@
+kedro_classification
+├── README.md
+├── __pycache__
+│   └── kedro_cli.cpython-37.pyc
+├── conf
+│   ├── README.md
+│   ├── base
+│   │   ├── catalog.yml
+│   │   ├── credentials.yml
+│   │   ├── logging.yml
+│   │   └── parameters.yml
+│   └── local
+├── data
+│   ├── 01_raw
+│   │   └── UseData.csv
+│   ├── 02_intermediate
+│   │   └── preprocessed_Data.csv
+│   ├── 03_primary
+│   ├── 04_features
+│   ├── 05_model_input
+│   ├── 06_models
+│   ├── 07_model_output
+│   └── 08_reporting
+├── docs
+│   └── source
+│       ├── conf.py
+│       └── index.rst
+├── files.txt
+├── kedro_cli.py
+├── logs
+│   ├── errors.log
+│   ├── info.log
+│   └── journals
+├── notebooks
+├── references
+├── results
+├── setup.cfg
+└── src
+    ├── kedro_classification
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   │   ├── __init__.cpython-37.pyc
+    │   │   ├── pipeline.cpython-37.pyc
+    │   │   └── run.cpython-37.pyc
+    │   ├── nodes
+    │   │   ├── __init__.py
+    │   │   ├── __pycache__
+    │   │   │   └── __init__.cpython-37.pyc
+    │   │   └── data_engineering
+    │   │       ├── data_engineering_node.py
+    │   │       └── data_engineering_pipeline.py
+    │   ├── pipeline.py
+    │   ├── pipelines
+    │   │   ├── __init__.py
+    │   │   ├── __pycache__
+    │   │   │   └── __init__.cpython-37.pyc
+    │   │   ├── data_engineering
+    │   │   │   ├── __pycache__
+    │   │   │   │   ├── nodes.cpython-37.pyc
+    │   │   │   │   └── pipeline.cpython-37.pyc
+    │   │   │   ├── nodes.py
+    │   │   │   └── pipeline.py
+    │   │   └── data_science
+    │   │       ├── __pycache__
+    │   │       │   ├── nodes.cpython-37.pyc
+    │   │       │   └── pipeline.cpython-37.pyc
+    │   │       ├── nodes.py
+    │   │       └── pipeline.py
+    │   └── run.py
+    ├── requirements.txt
+    ├── setup.py
+    └── tests
+        ├── __init__.py
+        ├── __pycache__
+        │   ├── __init__.cpython-37.pyc
+        │   └── test_run.cpython-37-PYTEST.pyc
+        └── test_run.py
+
+34 directories, 112 files

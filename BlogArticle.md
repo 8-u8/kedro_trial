@@ -1,6 +1,5 @@
 # README
-This is a kedro trial project and  usage report in Japanese
-It copied by [My blog](http://socinuit.hatenablog.com/entry/2020/02/08/210423).
+This is a kedro usage report in [Japanese Blog](http://socinuit.hatenablog.com/entry/2020/02/08/210423).
 
 # 個人的背景
 
@@ -11,7 +10,7 @@ pipelineを作ろうと言うことになりました。
 ただ、私はエンジニアリング畑ではないので、ゼロから作れる自信がありません。  
 困ったなー困ったなーと思っていたところに、こんなQiitaを見かけました。
 
-https://qiita.com/Minyus86/items/70622a1502b92ac6b29c
+[https://qiita.com/Minyus86/items/70622a1502b92ac6b29c:embed:cite]
 
 なるほど、いろいろあるんだな、となりました。  
 この中から今回はKedroを導入しとりあえず触ってみたのでレポします。
@@ -27,7 +26,7 @@ https://qiita.com/Minyus86/items/70622a1502b92ac6b29c
 ## Kedroとは
 
 もうgithubに飛んだほうが早い
-https://github.com/quantumblacklabs/kedro
+[https://github.com/quantumblacklabs/kedro:embed:cite]
 
 Quantumblack社が手がけるオープンソースのpipelineライブラリです。  
 
@@ -56,14 +55,19 @@ Twitterで「このやり方あとで調べよう」つったら
 こうしていろいろ教えてくれるんだと思うだけで結構心強かったりします。
 
 ### ロゴ・バナーがかっこいい
-このツイートが全てです
+このツイートが全てです((このあと「でもさっきバナー変えようってPR送っちゃった」って開発主担当の人が言ってくれたんだけどどのみちかっこいいからいい))。  
 
-https://twitter.com/0_u0/status/1224950323757740032
+[https://twitter.com/0_u0/status/1224950323757740032:embed:cite]
+
+バナーみたとき「あ、かっこいいし使おう」ってなっちゃいました。中二病なので。†でHN囲むタイプの。†きぬいと†。  
+つらくなってきた。
+
 
 ## 使ってみた
 
-ドキュメントがあるのでぶっちゃけここから先は蛇足でしかないんですがせっかくなのでレポートします
-実装githubはこのリポジトリ。
+ドキュメントがあるのでぶっちゃけここから先は蛇足でしかないんですが、使ってみたレポートです。  
+実装githubは以下。  
+[https://github.com/8-u8/kedro_trial/tree/master/kedro_classification:embed:cite]
 
 Kedroは`pip`でインストールできます。
 
@@ -200,7 +204,7 @@ def create_pipeline(**kwargs):
 
 実装も`nodes.py`の関数を持ってきて、  
 出力は`preprocessed_Data`として出す、というシンプルなものです((中間テーブルは`catalog.yml`で管理されます))。  
-`pipeline.py`は`data_science`でも同様の記法で書きます。
+`pipeline.py`は`data_science`でも同様の記法で書きます。なので省略です。
 
 ### data_science
 公式ドキュメントでは線型回帰の実装があったので、背伸びしてLightGBMの実装をやってみました。  
@@ -332,3 +336,18 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 ### `kedro run`
 テストが上手く行ったら走らせます。`kedro run`で走ります。  
 すごい。
+
+## おわりに
+長くなりました。  
+ここまでの実装は、ドキュメントを見ながら試行錯誤し、3日位で無理なく進められました。  
+今回はローカルでの実装ですが、もちろんKedroはAWSやGCPでも動きますし、  
+様々なDBからデータを獲得できます。
+データは分析が主で、パイプライン構築以前にこういうエンジニアリングの経験が浅い私にも  
+どうにか形にできるところまで道案内してくれるので、とても良いライブラリでした。
+
+一回ベースラインができたとはいえ、まだまだ足りないことも多いです。  
+現状はLighGBMのモデル関数の中でCVの手法をねじ込んでいる部分の改善や、  
+複数の前処理関数を組合せたpipeline構築など、  
+脱Tutorialな課題はいっぱいあります。  
+ただ、これはKedro側の問題というよりは`nodes.py`内でどう実装するかの問題なので、  
+Kedroは割と柔軟にここを受け入れてくれると信じています(？)  
