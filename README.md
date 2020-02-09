@@ -28,8 +28,8 @@ pipelineを作ろうと言うことになりました。
 
 ## Kedroとは
 
-もうgithubに飛んだほうが早い
-[https://github.com/quantumblacklabs/kedro]
+もうgithubに飛んだほうが早い  
+https://github.com/quantumblacklabs/kedro
 
 Quantumblack社が手がけるオープンソースのpipelineライブラリです。  
 
