@@ -10,7 +10,12 @@ preprocessed_Data:
   type: CSVLocalDataSet
   filepath: data/02_intermediate/preprocessed_Data.csv
 
-regressor:
+regressor_LGB:
   type: PickleLocalDataSet
   filepath: data/06_models/LightGBMregressor.pkl
+  versioned: true
+
+regressor_XGB:
+  type: PickleLocalDataSet
+  filepath: data/06_models/XGBoostregressor.pkl
   versioned: true

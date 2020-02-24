@@ -12,7 +12,7 @@ from sklearn.metrics import auc, roc_curve, roc_auc_score
 from sklearn.model_selection import KFold, train_test_split
 
 import lightgbm as lgb
-
+import xgboost as xgb
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> List:
     y = data['y'].values
@@ -48,7 +48,7 @@ def LightGBM_model(
     lgb_params = {
             'num_iterations'         : parameters['n_estimators'],
             'boosting_type'        : parameters['boosting_type'],
-            'objective'            : parameters['objective'],
+            'objective'            : parameters['lgb_objective'],
             'metric'               : parameters['metric'],
             'num_leaves'           : parameters['num_leaves'],
             #'subsample'            : parameters['subsample'],
@@ -97,8 +97,75 @@ def LightGBM_model(
     
     return regressor
 
+def XGBoost_model(
+    data:pd.DataFrame,
+    parameters:Dict
+) -> xgb.XGBRegressor:
+    oof_preds_xgb = np.zeros(train_df.shape[0])
+    sub_preds_xgb = np.zeros(test_df.shape[0])
+    xgb_params = {
+        'objective': parameters['xgb_objective'],
+        'eval_metric': parameters['eval_metric'],
+        'booster': parameters['booster'],
+        'n_jobs': parameters['n_jobs'],
+        'tree_method': parameters['hist'],
+        'eta': parameters['eta'],
+        'grow_policy': parameters['grow_policy'],
+        'max_delta_step': parameters['max_delta_step'],
+        'seed': parameters['seed'],
+        'colsample_bylevel': parameters['colsample_bylevel'],
+        'colsample_bytree': parameters['colsample_bytree'],
+        'gamma': parameters['gamma'],
+        'learning_rate': parameters['learning_rate'],
+        'max_bin': parameters['max_bin'],
+        'max_depth': parameters[max_depth],
+        'max_leaves': parameters['max_leaves'],
+        'min_child_weight': parameters['min_child_weight'],
+        'reg_alpha': parameters['reg_alpha'],
+        'reg_lambda': parameters['reg_lambda'],
+        'subsample': parameters['subsample']
+        }
+
+    fold = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
+
+    train_df = data.drop('ID', axis=1)
+    target_name = parameters['target']
+
+    for fold_, (train_idx, valid_idx) in enumerate(fold_xgb.split(train_df.values)):
+        train_x, train_y = train_df.iloc[train_idx], train[target_name].iloc[train_idx]
+        valid_x, valid_y = train_df.iloc[valid_idx], train[target_name].iloc[valid_idx]
+
+        print("fold n °{}".format(fold_))
+        trn_Data = xgb.DMatrix(train_x, label = train_y)
+        val_Data = xgb.DMatrix(valid_x, label = valid_y)
+        watchlist = [(trn_Data, "Train"), (val_Data, "Valid")]
+        print("xgb" + str(fold_) + "-" * 50)
+        num_rounds = parameters['num_rounds']
+        xgb_model = xgb.train(xgb_params, trn_Data,num_rounds,watchlist,early_stopping_rounds=50, verbose_eval= 1000)
+        #oof_preds_xgb[valid_idx] = xgb_model.predict(xgb.DMatrix(train_df.iloc[valid_idx][feats]), ntree_limit = xgb_model.best_ntree_limit + 50)
+        #sub_preds_xgb = xgb_model.predict(xgb.DMatrix(test_df[feats]),ntree_limit= xgb_model.best_ntree_limit)/fold_xgb.n_splits
+        
+        del train_idx,valid_idx
+        gc.collect()
+    #xgb.plot_importance(xgb_model)
+    #plt.figure(figsize = (16,10))
+    #plt.savefig("importance.png")
+    #xgb.to_graphviz(xgb_model)
+    return xgb_model
+
 
 def evaluate_LightGBM_model(regressor: lgb.basic.Booster, X_test: np.ndarray, y_test: np.ndarray): 
+    y_pred = regressor.predict(X_test, num_iteration=regressor.best_iteration)
+    print("y predicted!")
+    print(type(y_pred)) 
+    #y_pred = np.argmax(y_pred, axis=1)
+    #roc_curve = r
+    score  = roc_auc_score(y_test, y_pred)
+    logger = logging.getLogger(__name__)
+    logger.info("AUC is %.3f.", score)
+
+
+def evaluate_XGBoost_model(regressor: xgb.core.Booster, X_test: np.ndarray, y_test: np.ndarray): 
     y_pred = regressor.predict(X_test, num_iteration=regressor.best_iteration)
     print("y predicted!")
     print(type(y_pred)) 
