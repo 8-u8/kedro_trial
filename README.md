@@ -210,9 +210,58 @@ def create_pipeline(**kwargs):
 公式ドキュメントでは線型回帰の実装があったので、背伸びしてLightGBMの実装をやってみました。  
 コード(一部)は以下。
 
+なんかもしや？と思ったのですが、yamlファイルで管理しているパラメータを以下のようにすると、
+「このモデルで使うパラメータはここ」という形で管理できます。
+こうすることで`node.py`の中で管理しなくてもいいことになりました。
+
+```yaml: parameters.yml
+
+LightGBM_model: 
+  n_estimators: 5000
+  boosting_type: 'gbdt'
+  objective: 'regression'
+  metric: 'rmse'
+  num_leaves: 50
+  #subsample: 0.85
+  #subsample_freq: 1
+  learning_rate: 0.01
+  #feature_fraction: 0.9
+  max_depth: 5
+  #lambda_l1: 0.1
+  #lambda_l2: 0.1
+  verbose: -1
+  early_stopping_rounds: 1000
+  #eval_metric: 'auc'
+
+
+XGBoost_model: 
+  num_rounds: 5000
+  objective: 'binary:logistic'
+  eval_metric: 'auc'
+  booster: 'gbtree'
+  n_jobs: 4
+  tree_method: 'hist'
+  eta: 0.01
+  grow_policy: 'lossguide'
+  max_delta_step: 2
+  #seed: 538
+  colsample_bylevel: 0.9
+  colsample_bytree: 0.8
+  gamma: 1.0
+  learning_rate: 0.01
+  max_bin: 64
+  max_depth: 6
+  max_leaves: 10
+  min_child_weight: 10
+  reg_alpha: 1e-06
+  reg_lambda: 1.0
+  subsample: 0.7
+```
+
 ```python: data_science/nodes.py
 def LightGBM_model(
     data: pd.DataFrame,
+    #y: np.ndarray,
     parameters: Dict
     ) -> lgb.LGBMRegressor:
     
@@ -221,19 +270,11 @@ def LightGBM_model(
     y = data['y']
     X = data.drop(['y', 'ID'], axis=1)
     ### hyperparameters from parameters.yml
-    lgb_params = {
-            'num_iterations'       : parameters['n_estimators'],
-            'boosting_type'        : parameters['boosting_type'],
-            'objective'            : parameters['objective'],
-            'metric'               : parameters['metric'],
-            'num_leaves'           : parameters['num_leaves'],
-            'learning_rate'        : parameters['learning_rate'],
-            'max_depth'            : parameters['max_depth'],
-            'verbosity'            : parameters['verbose'],
-            'early_stopping_round' : parameters['early_stopping_rounds'],
-            'seed'                 : parameters['seed']
-            }
+    lgb_params = parameters['LightGBM_model'] 
 
+    ### fold?
+    ### I want to define this function out of LightGBM_model.
+    ### Keep thinking...
     fold = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
 
     oof_pred = np.zeros(len(X))
@@ -255,6 +296,11 @@ def LightGBM_model(
         auc_valid = roc_auc_score(y_valid, y_valid_pred)
         print('Early stopping round is: {iter}'.format(iter=regressor.current_iteration()))
         print('Fold {n_folds}: train AUC is {train: .3f} valid AUC is {valid: .3f}'.format(n_folds=k+1, train=auc_train, valid=auc_valid))
+
+        #train_roc = roc_auc_score()
+    #print(type(regressor))
+    
+    ### todo: evaluation, predict oof...
     
     return regressor
 
@@ -269,8 +315,51 @@ def evaluate_LightGBM_model(regressor: lgb.basic.Booster, X_test: np.ndarray, y_
     logger = logging.getLogger(__name__)
     logger.info('AUC is %.3f.', score)
 ```
+
+ついでにXGBoostも同様の形で実装したのでメモ。
+
+``` python: data_science/node.py
+def XGBoost_model(
+    data:pd.DataFrame,
+    parameters:Dict
+) -> xgb.core.Booster:
+
+    fold_xgb = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
+    train_df = data.drop('ID', axis=1)
+    xgb_params = parameters['XGBoost_model']
+    num_rounds = xgb_params['num_rounds']
+    y = train_df[parameters['target']]
+    train_df = train_df.drop(parameters['target'], axis=1)
+    feature = train_df.columns.values
+
+    for fold_, (train_idx, valid_idx) in enumerate(fold_xgb.split(train_df.values)):
+        train_x, train_y = train_df.iloc[train_idx], y.iloc[train_idx]
+        valid_x, valid_y = train_df.iloc[valid_idx], y.iloc[valid_idx]
+        print("fold n °{}".format(fold_+1))
+        trn_Data = xgb.DMatrix(train_x, label = train_y, feature_names=feature)
+        val_Data = xgb.DMatrix(valid_x, label = valid_y, feature_names=feature)
+        watchlist = [(trn_Data, "Train"), (val_Data, "Valid")]
+        print("xgb trainng folds " + str(fold_) + "-" * 50)
+        xgb_model = xgb.train(xgb_params, trn_Data,num_rounds,watchlist,early_stopping_rounds=100, verbose_eval= 1000)
+        del train_idx,valid_idx
+        gc.collect()
+    return xgb_model
+
+def evaluate_XGBoost_model(regressor: xgb.core.Booster, X_test: np.ndarray, y_test: np.ndarray): 
+    #X_test = X_test.values
+    #print(regressor.feature_names)
+    xgb_test = xgb.DMatrix(X_test, feature_names=regressor.feature_names)
+    y_pred = regressor.predict(xgb_test, ntree_limit=regressor.best_ntree_limit)
+    print("y predicted on XGBoost!")
+    print(type(y_pred)) 
+    #y_pred = np.argmax(y_pred, axis=1)
+    #roc_curve = r
+    score  = roc_auc_score(y_test, y_pred)
+    logger = logging.getLogger(__name__)
+    logger.info("XGBoost AUC is %.3f.", score)
+```
+
 汚い実装で恥ずかしいですが、こんな感じで書ければ大丈夫です。  
-`parameters`を入れておけば、対応するハイパーパラメータをKedroがよしなに持ってきてくれます。  
 `pipeline.py`でこれらの関数と入出力を指定すればOK。
 
 ```python: data_science/pipeline.py

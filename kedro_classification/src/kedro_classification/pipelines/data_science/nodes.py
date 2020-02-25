@@ -46,7 +46,7 @@ def LightGBM_model(
     y = data['y']
     X = data.drop(['y', 'ID'], axis=1)
     ### hyperparameters from parameters.yml
-    lgb_params = parameters 
+    lgb_params = parameters['LightGBM_model'] 
             #{
             #'num_iterations'         : parameters['n_estimators'],
             #'boosting_type'        : parameters['boosting_type'],
@@ -113,7 +113,7 @@ def XGBoost_model(
     #train_df = train_df.values()
     
 
-    xgb_params = parameters
+    xgb_params = parameters['XGBoost_model']
         #{
         #'objective': parameters['xgb_objective'],
         #'eval_metric': parameters['eval_metric'],
@@ -138,7 +138,7 @@ def XGBoost_model(
         #'num_round' : parameters['num_rounds']
         #}
     
-    num_rounds = parameters['num_rounds']
+    num_rounds = xgb_params['num_rounds']
 
     y = train_df[parameters['target']]
     train_df = train_df.drop(parameters['target'], axis=1)
