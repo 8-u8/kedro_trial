@@ -26,8 +26,8 @@ early_stopping_rounds: 1000
 
 # XGBoost_model
 target: 'y'
-num_rounds: 1000
-xgb_objective: 'regression'
+num_rounds: 5000
+xgb_objective: 'binary:logistic'
 eval_metric: 'auc'
 booster: 'gbtree'
 n_jobs: 4
@@ -39,7 +39,7 @@ max_delta_step: 2
 colsample_bylevel: 0.9
 colsample_bytree: 0.8
 gamma: 1.0
-learning_rate: 0.001
+learning_rate: 0.01
 max_bin: 64
 max_depth: 6
 max_leaves: 10

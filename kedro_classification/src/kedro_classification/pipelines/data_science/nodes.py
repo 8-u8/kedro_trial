@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 import numpy as np
 from typing import Any, Dict, List
+import gc
 
 import warnings
 warnings.simplefilter('ignore')
@@ -100,15 +101,23 @@ def LightGBM_model(
 def XGBoost_model(
     data:pd.DataFrame,
     parameters:Dict
-) -> xgb.XGBRegressor:
-    oof_preds_xgb = np.zeros(train_df.shape[0])
-    sub_preds_xgb = np.zeros(test_df.shape[0])
+) -> xgb.core.Booster:
+    #oof_preds_xgb = np.zeros(train_df.shape[0])
+    #sub_preds_xgb = np.zeros(test_df.shape[0])
+    
+
+    fold_xgb = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
+
+    train_df = data.drop('ID', axis=1)
+    #train_df = train_df.values()
+    
+
     xgb_params = {
         'objective': parameters['xgb_objective'],
         'eval_metric': parameters['eval_metric'],
         'booster': parameters['booster'],
         'n_jobs': parameters['n_jobs'],
-        'tree_method': parameters['hist'],
+        'tree_method': parameters['tree_method'],
         'eta': parameters['eta'],
         'grow_policy': parameters['grow_policy'],
         'max_delta_step': parameters['max_delta_step'],
@@ -118,30 +127,42 @@ def XGBoost_model(
         'gamma': parameters['gamma'],
         'learning_rate': parameters['learning_rate'],
         'max_bin': parameters['max_bin'],
-        'max_depth': parameters[max_depth],
+        'max_depth': parameters['max_depth'],
         'max_leaves': parameters['max_leaves'],
         'min_child_weight': parameters['min_child_weight'],
         'reg_alpha': parameters['reg_alpha'],
         'reg_lambda': parameters['reg_lambda'],
         'subsample': parameters['subsample']
+        #'num_round' : parameters['num_rounds']
         }
+    
+    num_rounds = parameters['num_rounds']
 
-    fold = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
+    y = train_df[parameters['target']]
+    train_df = train_df.drop(parameters['target'], axis=1)
 
-    train_df = data.drop('ID', axis=1)
-    target_name = parameters['target']
+    feature = train_df.columns.values
 
     for fold_, (train_idx, valid_idx) in enumerate(fold_xgb.split(train_df.values)):
-        train_x, train_y = train_df.iloc[train_idx], train[target_name].iloc[train_idx]
-        valid_x, valid_y = train_df.iloc[valid_idx], train[target_name].iloc[valid_idx]
-
-        print("fold n °{}".format(fold_))
-        trn_Data = xgb.DMatrix(train_x, label = train_y)
-        val_Data = xgb.DMatrix(valid_x, label = valid_y)
+        train_x, train_y = train_df.iloc[train_idx], y.iloc[train_idx]
+        valid_x, valid_y = train_df.iloc[valid_idx], y.iloc[valid_idx]
+        
+        
+        
+        print("fold n °{}".format(fold_+1))
+        trn_Data = xgb.DMatrix(train_x, label = train_y, feature_names=feature)
+        val_Data = xgb.DMatrix(valid_x, label = valid_y, feature_names=feature)
         watchlist = [(trn_Data, "Train"), (val_Data, "Valid")]
-        print("xgb" + str(fold_) + "-" * 50)
-        num_rounds = parameters['num_rounds']
-        xgb_model = xgb.train(xgb_params, trn_Data,num_rounds,watchlist,early_stopping_rounds=50, verbose_eval= 1000)
+        print("xgb trainng folds " + str(fold_) + "-" * 50)
+
+        #regressor = xgb.XGBRegressor(**xgb_params)
+        #xgb_model = regressor.fit(X=train_x,
+        #                          y=train_y,
+        #                          eval_set=([train_x,train_y],[valid_x,valid_y]), 
+        #                          early_stopping_rounds=50
+                                  #verbose_eval=1000,
+        #                          )
+        xgb_model = xgb.train(xgb_params, trn_Data,num_rounds,watchlist,early_stopping_rounds=100, verbose_eval= 1000)
         #oof_preds_xgb[valid_idx] = xgb_model.predict(xgb.DMatrix(train_df.iloc[valid_idx][feats]), ntree_limit = xgb_model.best_ntree_limit + 50)
         #sub_preds_xgb = xgb_model.predict(xgb.DMatrix(test_df[feats]),ntree_limit= xgb_model.best_ntree_limit)/fold_xgb.n_splits
         
@@ -156,21 +177,24 @@ def XGBoost_model(
 
 def evaluate_LightGBM_model(regressor: lgb.basic.Booster, X_test: np.ndarray, y_test: np.ndarray): 
     y_pred = regressor.predict(X_test, num_iteration=regressor.best_iteration)
-    print("y predicted!")
+    print("y predicted on LightGBM!")
     print(type(y_pred)) 
     #y_pred = np.argmax(y_pred, axis=1)
     #roc_curve = r
     score  = roc_auc_score(y_test, y_pred)
     logger = logging.getLogger(__name__)
-    logger.info("AUC is %.3f.", score)
+    logger.info("LightGBM AUC is %.3f.", score)
 
 
 def evaluate_XGBoost_model(regressor: xgb.core.Booster, X_test: np.ndarray, y_test: np.ndarray): 
-    y_pred = regressor.predict(X_test, num_iteration=regressor.best_iteration)
-    print("y predicted!")
+    #X_test = X_test.values
+    #print(regressor.feature_names)
+    xgb_test = xgb.DMatrix(X_test, feature_names=regressor.feature_names)
+    y_pred = regressor.predict(xgb_test, ntree_limit=regressor.best_ntree_limit)
+    print("y predicted on XGBoost!")
     print(type(y_pred)) 
     #y_pred = np.argmax(y_pred, axis=1)
     #roc_curve = r
     score  = roc_auc_score(y_test, y_pred)
     logger = logging.getLogger(__name__)
-    logger.info("AUC is %.3f.", score)
+    logger.info("XGBoost AUC is %.3f.", score)
