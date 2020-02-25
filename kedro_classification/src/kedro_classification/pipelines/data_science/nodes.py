@@ -46,24 +46,25 @@ def LightGBM_model(
     y = data['y']
     X = data.drop(['y', 'ID'], axis=1)
     ### hyperparameters from parameters.yml
-    lgb_params = {
-            'num_iterations'         : parameters['n_estimators'],
-            'boosting_type'        : parameters['boosting_type'],
-            'objective'            : parameters['lgb_objective'],
-            'metric'               : parameters['metric'],
-            'num_leaves'           : parameters['num_leaves'],
+    lgb_params = parameters 
+            #{
+            #'num_iterations'         : parameters['n_estimators'],
+            #'boosting_type'        : parameters['boosting_type'],
+            #'objective'            : parameters['lgb_objective'],
+            #'metric'               : parameters['metric'],
+            #'num_leaves'           : parameters['num_leaves'],
             #'subsample'            : parameters['subsample'],
             #'subsample_freq'       : parameters['subsample_freq'],
-            'learning_rate'        : parameters['learning_rate'],
+            #'learning_rate'        : parameters['learning_rate'],
             #'feature_fraction'     : parameters['feature_fraction'],
-            'max_depth'            : parameters['max_depth'],
+            #'max_depth'            : parameters['max_depth'],
             #'lambda_l1'            : parameters['lambda_l1'],  
             #'lambda_l2'            : parameters['lambda_l2'],
-            'verbosity'              : parameters['verbose'],
-            'early_stopping_round': parameters['early_stopping_rounds'],
+            #'verbosity'              : parameters['verbose'],
+            #'early_stopping_round': parameters['early_stopping_rounds'],
             #'eval_metric'          : parameters['eval_metric'],
-            'seed'                 : parameters['seed']
-            }
+            #'seed'                 : parameters['seed']
+            #}
 
 
     ### fold?
@@ -112,29 +113,30 @@ def XGBoost_model(
     #train_df = train_df.values()
     
 
-    xgb_params = {
-        'objective': parameters['xgb_objective'],
-        'eval_metric': parameters['eval_metric'],
-        'booster': parameters['booster'],
-        'n_jobs': parameters['n_jobs'],
-        'tree_method': parameters['tree_method'],
-        'eta': parameters['eta'],
-        'grow_policy': parameters['grow_policy'],
-        'max_delta_step': parameters['max_delta_step'],
-        'seed': parameters['seed'],
-        'colsample_bylevel': parameters['colsample_bylevel'],
-        'colsample_bytree': parameters['colsample_bytree'],
-        'gamma': parameters['gamma'],
-        'learning_rate': parameters['learning_rate'],
-        'max_bin': parameters['max_bin'],
-        'max_depth': parameters['max_depth'],
-        'max_leaves': parameters['max_leaves'],
-        'min_child_weight': parameters['min_child_weight'],
-        'reg_alpha': parameters['reg_alpha'],
-        'reg_lambda': parameters['reg_lambda'],
-        'subsample': parameters['subsample']
+    xgb_params = parameters
+        #{
+        #'objective': parameters['xgb_objective'],
+        #'eval_metric': parameters['eval_metric'],
+        #'booster': parameters['booster'],
+        #'n_jobs': parameters['n_jobs'],
+        #'tree_method': parameters['tree_method'],
+        #'eta': parameters['eta'],
+        #'grow_policy': parameters['grow_policy'],
+        #'max_delta_step': parameters['max_delta_step'],
+        #'seed': parameters['seed'],
+        #'colsample_bylevel': parameters['colsample_bylevel'],
+        #'colsample_bytree': parameters['colsample_bytree'],
+        #'gamma': parameters['gamma'],
+        #'learning_rate': parameters['learning_rate'],
+        #'max_bin': parameters['max_bin'],
+        #'max_depth': parameters['max_depth'],
+        #'max_leaves': parameters['max_leaves'],
+        #'min_child_weight': parameters['min_child_weight'],
+        #'reg_alpha': parameters['reg_alpha'],
+        #'reg_lambda': parameters['reg_lambda'],
+        #'subsample': parameters['subsample']
         #'num_round' : parameters['num_rounds']
-        }
+        #}
     
     num_rounds = parameters['num_rounds']
 
