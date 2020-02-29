@@ -19,3 +19,11 @@ regressor_XGB:
   type: PickleLocalDataSet
   filepath: data/06_models/XGBoostregressor.pkl
   versioned: true
+
+pred_LGBM:
+  type: CSVLocalDataSet
+  filepath: data/07_model_output/pred_LGBM.csv
+
+pred_XGBM:
+  type: CSVLocalDataSet
+  filepath: data/07_model_output/pred_XGBM.csv

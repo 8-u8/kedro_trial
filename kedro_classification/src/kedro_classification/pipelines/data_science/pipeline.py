@@ -28,7 +28,7 @@ def create_pipeline(**kwargs):
             node(
                 func=evaluate_LightGBM_model,
                 inputs=["regressor_LGB", "X_test", "y_test"],
-                outputs=None,
+                outputs='pred_LGBM',
             ),
             node(
                 func=XGBoost_model,
@@ -39,7 +39,7 @@ def create_pipeline(**kwargs):
             node(
                 func=evaluate_XGBoost_model,
                 inputs=["regressor_XGB", "X_test", "y_test"],
-                outputs=None,
+                outputs='pred_XGBM',
             ),
         ]
     )

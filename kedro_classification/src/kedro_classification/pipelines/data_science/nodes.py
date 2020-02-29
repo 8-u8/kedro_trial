@@ -12,8 +12,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import auc, roc_curve, roc_auc_score
 from sklearn.model_selection import KFold, train_test_split
 
+import matplotlib.pyplot as plt
+
 import lightgbm as lgb
 import xgboost as xgb
+
+from kedro.contrib.io.matplotlib import MatplotlibLocalWriter
+
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> List:
     y = data['y'].values
@@ -47,24 +52,6 @@ def LightGBM_model(
     X = data.drop(['y', 'ID'], axis=1)
     ### hyperparameters from parameters.yml
     lgb_params = parameters['LightGBM_model'] 
-            #{
-            #'num_iterations'         : parameters['n_estimators'],
-            #'boosting_type'        : parameters['boosting_type'],
-            #'objective'            : parameters['lgb_objective'],
-            #'metric'               : parameters['metric'],
-            #'num_leaves'           : parameters['num_leaves'],
-            #'subsample'            : parameters['subsample'],
-            #'subsample_freq'       : parameters['subsample_freq'],
-            #'learning_rate'        : parameters['learning_rate'],
-            #'feature_fraction'     : parameters['feature_fraction'],
-            #'max_depth'            : parameters['max_depth'],
-            #'lambda_l1'            : parameters['lambda_l1'],  
-            #'lambda_l2'            : parameters['lambda_l2'],
-            #'verbosity'              : parameters['verbose'],
-            #'early_stopping_round': parameters['early_stopping_rounds'],
-            #'eval_metric'          : parameters['eval_metric'],
-            #'seed'                 : parameters['seed']
-            #}
 
 
     ### fold?
@@ -114,30 +101,7 @@ def XGBoost_model(
     
 
     xgb_params = parameters['XGBoost_model']
-        #{
-        #'objective': parameters['xgb_objective'],
-        #'eval_metric': parameters['eval_metric'],
-        #'booster': parameters['booster'],
-        #'n_jobs': parameters['n_jobs'],
-        #'tree_method': parameters['tree_method'],
-        #'eta': parameters['eta'],
-        #'grow_policy': parameters['grow_policy'],
-        #'max_delta_step': parameters['max_delta_step'],
-        #'seed': parameters['seed'],
-        #'colsample_bylevel': parameters['colsample_bylevel'],
-        #'colsample_bytree': parameters['colsample_bytree'],
-        #'gamma': parameters['gamma'],
-        #'learning_rate': parameters['learning_rate'],
-        #'max_bin': parameters['max_bin'],
-        #'max_depth': parameters['max_depth'],
-        #'max_leaves': parameters['max_leaves'],
-        #'min_child_weight': parameters['min_child_weight'],
-        #'reg_alpha': parameters['reg_alpha'],
-        #'reg_lambda': parameters['reg_lambda'],
-        #'subsample': parameters['subsample']
-        #'num_round' : parameters['num_rounds']
-        #}
-    
+
     num_rounds = xgb_params['num_rounds']
 
     y = train_df[parameters['target']]
@@ -148,8 +112,6 @@ def XGBoost_model(
     for fold_, (train_idx, valid_idx) in enumerate(fold_xgb.split(train_df.values)):
         train_x, train_y = train_df.iloc[train_idx], y.iloc[train_idx]
         valid_x, valid_y = train_df.iloc[valid_idx], y.iloc[valid_idx]
-        
-        
         
         print("fold n °{}".format(fold_+1))
         trn_Data = xgb.DMatrix(train_x, label = train_y, feature_names=feature)
@@ -177,26 +139,57 @@ def XGBoost_model(
     return xgb_model
 
 
-def evaluate_LightGBM_model(regressor: lgb.basic.Booster, X_test: np.ndarray, y_test: np.ndarray): 
+def evaluate_LightGBM_model(regressor: lgb.basic.Booster, X_test: pd.DataFrame, y_test: np.ndarray)->pd.DataFrame: 
     y_pred = regressor.predict(X_test, num_iteration=regressor.best_iteration)
     print("y predicted on LightGBM!")
     print(type(y_pred)) 
     #y_pred = np.argmax(y_pred, axis=1)
     #roc_curve = r
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    plt.plot([0, 1], [0, 1], linestyle='--', label='No Skill')
+    plt.plot(fpr, tpr, marker='.', label='LGBM')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc='lower right')
+
     score  = roc_auc_score(y_test, y_pred)
+
+    single_plot_writer = MatplotlibLocalWriter(filepath="data/07_model_output/ROC_plot_LGBM.png")
+    single_plot_writer.save(plt)
+    plt.clf()
+
     logger = logging.getLogger(__name__)
     logger.info("LightGBM AUC is %.3f.", score)
 
+    output = pd.DataFrame({'y_pred': y_pred, 'y_act':y_test})
+    return output
 
-def evaluate_XGBoost_model(regressor: xgb.core.Booster, X_test: np.ndarray, y_test: np.ndarray): 
+
+def evaluate_XGBoost_model(regressor: xgb.core.Booster, X_test: pd.DataFrame, y_test: np.ndarray)->pd.DataFrame: 
     #X_test = X_test.values
     #print(regressor.feature_names)
     xgb_test = xgb.DMatrix(X_test, feature_names=regressor.feature_names)
     y_pred = regressor.predict(xgb_test, ntree_limit=regressor.best_ntree_limit)
     print("y predicted on XGBoost!")
     print(type(y_pred)) 
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    plt.plot([0, 1], [0, 1], linestyle='--', label='No Skill')
+    plt.plot(fpr, tpr, marker='.', label='XGBM')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc='lower right')
+
+    score  = roc_auc_score(y_test, y_pred)
+
+    single_plot_writer = MatplotlibLocalWriter(filepath="data/07_model_output/ROC_plot_XGB.png")
+    single_plot_writer.save(plt)
+    plt.clf()
+
     #y_pred = np.argmax(y_pred, axis=1)
     #roc_curve = r
     score  = roc_auc_score(y_test, y_pred)
     logger = logging.getLogger(__name__)
     logger.info("XGBoost AUC is %.3f.", score)
+
+    output = pd.DataFrame({'y_pred': y_pred, 'y_act':y_test})
+    return output
