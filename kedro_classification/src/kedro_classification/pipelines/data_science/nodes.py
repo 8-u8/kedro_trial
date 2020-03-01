@@ -58,7 +58,7 @@ def LightGBM_model(
     ### I want to define this function out of LightGBM_model.
     ### Keep thinking...
     fold = KFold(n_splits=parameters['folds'], random_state=parameters['random_state'])
-
+    #print(lgb_params)
     oof_pred = np.zeros(len(X))
     ### run model with kfold
     for k,   (train_index, valid_index) in enumerate(fold.split(X, y)):
@@ -68,7 +68,6 @@ def LightGBM_model(
     
         lgb_train = lgb.Dataset(X_train, y_train)
         lgb_valid = lgb.Dataset(X_valid, y_valid)
-
         regressor = lgb.train(lgb_params, lgb_train, valid_sets=lgb_valid, verbose_eval=False)
         
         y_train_pred = regressor.predict(X_train, num_iteration=regressor.best_iteration)
