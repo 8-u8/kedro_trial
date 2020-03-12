@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+'''
+Doc todo
+- make preprocessing function 
+  for train data and test data.
+
+'''
 
 def preprocessing(usedata: pd.DataFrame) -> pd.DataFrame:
     for i in range(1,40):

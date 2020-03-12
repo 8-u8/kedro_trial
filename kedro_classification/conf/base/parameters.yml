@@ -6,6 +6,8 @@ random_state: 1111
 seed: 114514
 folds: 5
 target: 'y'
+id_name: 'ID'
+isTrain: True
 
 LightGBM_model: 
   n_estimators: 5000
