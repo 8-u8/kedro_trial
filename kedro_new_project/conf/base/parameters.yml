@@ -1,0 +1,51 @@
+
+##### Do not write any parameters which not use #####
+# split_data
+test_size: 0.2
+random_state: 1111
+seed: 114514
+folds: 5
+target: 'y'
+id_name: 'ID'
+isTrain: True
+
+LightGBM_model: 
+  n_estimators: 5000
+  boosting_type: 'gbdt'
+  objective: 'regression'
+  metric: 'auc'
+  num_leaves: 31
+  subsample: 1
+  subsample_freq: 1
+  learning_rate: 0.01
+  feature_fraction: 0.9
+  max_depth: -1
+  lambda_l1: 0
+  lambda_l2: 0
+  verbose: -1
+  early_stopping_rounds: 1000
+  #eval_metric: 'auc'
+
+
+XGBoost_model: 
+  num_rounds: 5000
+  objective: 'binary:logistic'
+  eval_metric: 'auc'
+  booster: 'gbtree'
+  n_jobs: 4
+  tree_method: 'hist'
+  #eta: 0.3
+  grow_policy: 'lossguide'
+  max_delta_step: 0
+  #seed: 538
+  colsample_bylevel: 1
+  colsample_bytree: 1
+  gamma: 0
+  learning_rate: 0.01
+  max_bin: 256
+  max_depth: 6
+  max_leaves: 10
+  min_child_weight: 1
+  reg_alpha: 0
+  reg_lambda: 1.0
+  subsample: 1
